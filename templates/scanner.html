@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner HC Alimentos</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; }
+        #log { color: red; margin-top: 10px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h2>Escáner de Pallets</h2>
+    <div id="reader"></div>
+    <div id="log"></div> <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            alert("QR Detectado: " + decodedText);
+        }
+
+        function onScanFailure(error) {
+            // Esto es normal que falle a veces mientras intenta enfocar
+            console.warn(`Código QR no detectado: ${error}`);
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { 
+                fps: 10, 
+                qrbox: 250,
+                // FORZAR CÁMARA TRASERA
+                facingMode: { exact: "environment" } 
+            }
+        );
+
+        // Si falla la cámara trasera, intentamos cualquier cámara
+        html5QrcodeScanner.render(onScanSuccess, (err) => {
+            document.getElementById('log').innerText = "Error: " + err;
+            console.error(err);
+        });
+    </script>
+</body>
+</html>
