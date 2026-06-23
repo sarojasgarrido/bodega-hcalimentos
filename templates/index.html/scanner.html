@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escanear</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; }
+        #log { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2 id="titulo">Procesando...</h2>
+    <div id="reader"></div>
+    <div id="log"></div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const modo = params.get('modo'); // 'entrada' o 'salida'
+        document.getElementById('titulo').innerText = modo === 'entrada' ? "Registrar Entrada" : "Registrar Salida";
+
+        function onScanSuccess(decodedText) {
+            let url = modo === 'entrada' ? '/recepcion/pallet/?sku=' + decodedText + '&cantidad=1' : '/despacho/pallet/?codigo_qr=' + decodedText;
+            
+            fetch(url, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('log').innerText = "✅ Éxito: " + data.mensaje;
+                html5QrcodeScanner.pause(true);
+                setTimeout(() => { window.location.href = "/"; }, 2000); // Volver al menú
+            });
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, facingMode: { exact: "environment" } });
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>
